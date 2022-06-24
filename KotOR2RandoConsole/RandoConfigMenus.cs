@@ -42,12 +42,17 @@ namespace KotOR2RandoConsole
             if (Properties.UserSettings.Default.GalaxyMapUnlocked) Console.WriteLine("l : Lock Galaxy Map");
             else Console.WriteLine("u : Unlock Galaxy Map");
             Console.WriteLine($"s : Toggle Module Save patch ({(Properties.UserSettings.Default.ModuleSavePatch ? "Enabled" : "Disabled")})");
+            Console.WriteLine($"d : Toggle Door Unlocks ({(Properties.UserSettings.Default.DoorUnlocks ? "Enabled" : "Disabled")})");
             Console.WriteLine("x : Return to Config");
             var key = Console.ReadKey();
             switch (key.KeyChar)
             {
                 case 's':
                     Properties.UserSettings.Default.ModuleSavePatch = !Properties.UserSettings.Default.ModuleSavePatch;
+                    Modules();
+                    break;
+                case 'd':
+                    Properties.UserSettings.Default.DoorUnlocks = !Properties.UserSettings.Default.DoorUnlocks;
                     Modules();
                     break;
                 case 'u':

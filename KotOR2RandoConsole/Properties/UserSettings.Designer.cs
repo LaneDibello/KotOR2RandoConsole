@@ -94,5 +94,17 @@ namespace KotOR2RandoConsole.Properties {
                 this["DoItemRando"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool DoorUnlocks {
+            get {
+                return ((bool)(this["DoorUnlocks"]));
+            }
+            set {
+                this["DoorUnlocks"] = value;
+            }
+        }
     }
 }
