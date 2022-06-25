@@ -14,6 +14,8 @@ namespace KotOR2RandoConsole
         //Zones
         private const string AREA_PER_ADMIN     = "101PER";
         private const string AREA_PER_FUEL      = "103PER";
+        private const string AREA_PER_ASTROID   = "104PER";
+        private const string AREA_PER_DORMS     = "105PER";
         private const string AREA_PER_HANGER    = "106PER";
         private const string AREA_TEL_RES       = "203TEL";
         private const string AREA_TEL_ENTER_WAR = "222TEL";
@@ -34,6 +36,7 @@ namespace KotOR2RandoConsole
 		private const string LABEL_103PERTOMININGTUNNELS = "sw_door_per006"; // Explosion door at start of module
 		private const string LABEL_103PERFORCESHIELDS = "sw_door_per005";    // Force fields splitting fuel depot into two sections
         private const string LABEL_103PERSHIELD2 = "sw_door_per010";         // Secondary Fuel Depot Shield blocking way down
+        private const string LABEL_105PERTOASTROID = "sw_door_per005";       // Return to astroid exterior from Dormitory
         private const string LABEL_106PEREASTDOOR = "sw_door_per003";        // Door leading to Ebon Hawk
 		private const string LABEL_203TELAPPTDOOR = "adoor_intro";           // Appartment door we spawn behind
 		private const string LABEL_203TELEXCHANGE = "sw_door_telos002";      // Entacnce to Exchange base
@@ -209,12 +212,13 @@ namespace KotOR2RandoConsole
             UnlockDoorInFile(paths, AREA_PER_FUEL     , LABEL_103PERTOMININGTUNNELS);
             UnlockDoorInFile(paths, AREA_PER_FUEL     , LABEL_103PERFORCESHIELDS);
             UnlockDoorInFile(paths, AREA_PER_FUEL     , LABEL_103PERSHIELD2);
+            UnlockDoorInFile(paths, AREA_PER_DORMS    , LABEL_105PERTOASTROID);
             UnlockDoorInFile(paths, AREA_PER_HANGER   , LABEL_106PEREASTDOOR);
             UnlockDoorInFile(paths, AREA_TEL_RES      , LABEL_203TELAPPTDOOR); 
             UnlockDoorInFile(paths, AREA_TEL_RES      , LABEL_203TELEXCHANGE);
-            UnlockDoorInFile(paths, AREA_TEL_ENTER_WAR, LABEL_222TELRAVAGER );
-            UnlockDoorInFile(paths, AREA_TEL_ACAD     , LABEL_262TELPLATEAU ); //Broken
-            UnlockDoorInFile(paths, AREA_NAR_DOCKS    , LABEL_303NARZEZDOOR );
+            UnlockDoorInFile(paths, AREA_TEL_ENTER_WAR, LABEL_222TELRAVAGER); //Broken
+            UnlockDoorInFile(paths, AREA_TEL_ACAD     , LABEL_262TELPLATEAU); 
+            UnlockDoorInFile(paths, AREA_NAR_DOCKS    , LABEL_303NARZEZDOOR);
             UnlockDoorInFile(paths, AREA_NAR_JEKK     , LABEL_304NARBACKROOM);
             UnlockDoorInFile(paths, AREA_NAR_J_TUNNELS, LABEL_305NARTOJEKKJEKK);
             UnlockDoorInFile(paths, AREA_NAR_G0T0     , LABEL_351NARG0T0EBONHAWK);
@@ -224,6 +228,7 @@ namespace KotOR2RandoConsole
 
             //Enable tranistions for these doors with linking modules but no flags
             EnableDoorTransition(paths, AREA_PER_FUEL, LABEL_103PERTOMININGTUNNELS);
+            EnableDoorTransition(paths, AREA_PER_DORMS, LABEL_105PERTOASTROID, AREA_PER_ASTROID);
             EnableDoorTransition(paths, AREA_TEL_ACAD, LABEL_262TELPLATEAU);
         }
     }

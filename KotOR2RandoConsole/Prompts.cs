@@ -92,7 +92,7 @@ namespace KotOR2RandoConsole
             Console.WriteLine("s : set seed");
             Console.WriteLine("m : modules");
             Console.WriteLine("i : items");
-            Console.WriteLine("\nd : done");
+            Console.WriteLine("\nx : done");
             var key = Console.ReadKey();
             switch (key.KeyChar)
             {
@@ -105,7 +105,7 @@ namespace KotOR2RandoConsole
                 case 'i':
                     RandoConfigMenus.Items();
                     break;
-                case 'd':
+                case 'x':
                     StartUp();
                     break;
                 default:

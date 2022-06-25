@@ -185,7 +185,6 @@ namespace KotOR2RandoConsole
             switch (key.KeyChar)
             {
                 case 'x':
-                    Items();
                     break;
                 case 'n':
                     SetAllItemCats(RandomizationLevel.None);
@@ -220,59 +219,59 @@ namespace KotOR2RandoConsole
                     ListItemSettings();
                     break;
                 case '5':
-                    Properties.Items.Default.RandomizeCreature = ConfigureItemCat(ItemRando.ArmbandsRegs);
+                    Properties.Items.Default.RandomizeCreature = ConfigureItemCat(ItemRando.CreatureRegs);
                     ListItemSettings();
                     break;
                 case '6':
-                    Properties.Items.Default.RandomizeDroid = ConfigureItemCat(ItemRando.ArmbandsRegs);
+                    Properties.Items.Default.RandomizeDroid = ConfigureItemCat(ItemRando.DroidRegs);
                     ListItemSettings();
                     break;
                 case '7':
-                    Properties.Items.Default.RandomizeGloves = ConfigureItemCat(ItemRando.ArmbandsRegs);
+                    Properties.Items.Default.RandomizeGloves = ConfigureItemCat(ItemRando.GlovesRegs);
                     ListItemSettings();
                     break;
                 case '8':
-                    Properties.Items.Default.RandomizeGrenades = ConfigureItemCat(ItemRando.ArmbandsRegs);
+                    Properties.Items.Default.RandomizeGrenades = ConfigureItemCat(ItemRando.GrenadesRegs);
                     ListItemSettings();
                     break;
                 case '9':
-                    Properties.Items.Default.RandomizeImplants = ConfigureItemCat(ItemRando.ArmbandsRegs);
+                    Properties.Items.Default.RandomizeImplants = ConfigureItemCat(ItemRando.ImplantsRegs);
                     ListItemSettings();
                     break;
                 case 'a':
-                    Properties.Items.Default.RandomizeLightsabers = ConfigureItemCat(ItemRando.ArmbandsRegs);
+                    Properties.Items.Default.RandomizeLightsabers = ConfigureItemCat(ItemRando.LightsabersRegs);
                     ListItemSettings();
                     break;
                 case 'b':
-                    Properties.Items.Default.RandomizeMask = ConfigureItemCat(ItemRando.ArmbandsRegs);
+                    Properties.Items.Default.RandomizeMask = ConfigureItemCat(ItemRando.MaskRegs);
                     ListItemSettings();
                     break;
                 case 'c':
-                    Properties.Items.Default.RandomizeMelee = ConfigureItemCat(ItemRando.ArmbandsRegs);
+                    Properties.Items.Default.RandomizeMelee = ConfigureItemCat(ItemRando.MeleeRegs);
                     ListItemSettings();
                     break;
                 case 'd':
-                    Properties.Items.Default.RandomizeMines = ConfigureItemCat(ItemRando.ArmbandsRegs);
+                    Properties.Items.Default.RandomizeMines = ConfigureItemCat(ItemRando.MinesRegs);
                     ListItemSettings();
                     break;
                 case 'e':
-                    Properties.Items.Default.RandomizePaz = ConfigureItemCat(ItemRando.ArmbandsRegs);
+                    Properties.Items.Default.RandomizePaz = ConfigureItemCat(ItemRando.PazRegs);
                     ListItemSettings();
                     break;
                 case 'f':
-                    Properties.Items.Default.RandomizeStims = ConfigureItemCat(ItemRando.ArmbandsRegs);
+                    Properties.Items.Default.RandomizeStims = ConfigureItemCat(ItemRando.StimsRegs);
                     ListItemSettings();
                     break;
                 case 'g':
-                    Properties.Items.Default.RandomizeUpgrade = ConfigureItemCat(ItemRando.ArmbandsRegs);
+                    Properties.Items.Default.RandomizeUpgrade = ConfigureItemCat(ItemRando.UpgradeRegs);
                     ListItemSettings();
                     break;
                 case 'h':
-                    Properties.Items.Default.RandomizeProps = ConfigureItemCat(ItemRando.ArmbandsRegs);
+                    Properties.Items.Default.RandomizeProps = ConfigureItemCat(ItemRando.PropsRegs);
                     ListItemSettings();
                     break;
                 case 'i':
-                    Properties.Items.Default.RandomizePCrystal = ConfigureItemCat(ItemRando.ArmbandsRegs);
+                    Properties.Items.Default.RandomizePCrystal = ConfigureItemCat(ItemRando.PCrystalRegs);
                     ListItemSettings();
                     break;
                 case 'j':
