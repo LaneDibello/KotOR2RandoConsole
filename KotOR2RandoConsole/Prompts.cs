@@ -127,6 +127,7 @@ namespace KotOR2RandoConsole
                 Console.WriteLine($"\t- Omitting {OmitMods.Count} Modules");
                 Console.WriteLine($"\t- Galaxy Map {(Properties.UserSettings.Default.GalaxyMapUnlocked ? "Unlocked" : "Locked")}");
                 Console.WriteLine($"\t- Modulesave Patch {(Properties.UserSettings.Default.ModuleSavePatch ? "Enabled" : "Disabled")}");
+                Console.WriteLine($"\t- Door Unlocks {(Properties.UserSettings.Default.DoorUnlocks ? "Enabled" : "Disabled")}");
                 //List other settings later
             }
             if (Properties.UserSettings.Default.DoItemRando) 
@@ -191,7 +192,11 @@ namespace KotOR2RandoConsole
                 ItemRando.item_rando(paths);
             }
 
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
             Console.WriteLine("Randomization is done, press a key to continue...");
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
             Console.ReadKey();
             StartUp();
         }
@@ -208,7 +213,11 @@ namespace KotOR2RandoConsole
             paths.RestoreModulesDirectory();
             paths.RestoreLipsDirectory();
             File.Delete(paths.RANDOMIZED_LOG);
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
             Console.WriteLine("Done! Press any key...");
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
             Console.ReadKey();
             StartUp();
         }

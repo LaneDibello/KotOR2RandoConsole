@@ -83,9 +83,29 @@ namespace KotOR2RandoConsole.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        public static byte[] ebo_elev {
+            get {
+                object obj = ResourceManager.GetObject("ebo_elev", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         public static byte[] modulesave {
             get {
                 object obj = ResourceManager.GetObject("modulesave", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        public static byte[] r_to003EBO {
+            get {
+                object obj = ResourceManager.GetObject("r_to003EBO", resourceCulture);
                 return ((byte[])(obj));
             }
         }

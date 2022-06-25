@@ -27,6 +27,7 @@ namespace KotOR2RandoConsole
         private const string AREA_DAN_COURTYARD = "605DAN";
         private const string AREA_KOR_ACAD      = "702KOR";
         private const string AREA_KOR_SHY       = "710KOR";
+        private const string AREA_MAL_SURFACE   = "901MAL";
 
         //Locked Doors
         private const string LABEL_101PERTODORMS = "sw_door_per006";         // Dorms from Admin
@@ -68,7 +69,7 @@ namespace KotOR2RandoConsole
 
             // Shuffle the list of included modules.
             List<string> shuffle = new List<string>(RandomizedModules);
-            Randomize.FisherYatesShuffle(shuffle); 
+            //Randomize.FisherYatesShuffle(shuffle); 
             LookupTable.Clear();
 
             for (int i = 0; i < RandomizedModules.Count; i++)
@@ -192,6 +193,9 @@ namespace KotOR2RandoConsole
                 (g.Top_Level.Fields.FirstOrDefault(x => x.Label == "CurrentHP") as GFF.SHORT).Value = 1;
                 (g.Top_Level.Fields.FirstOrDefault(x => x.Label == "Min1HP") as GFF.BYTE).Value = 0;
 
+                //Set Fields related to interacting
+                (g.Top_Level.Fields.FirstOrDefault(x => x.Label == "Static") as GFF.BYTE).Value = 0;
+
                 // Write change(s) to file.
                 rf.File_Data = g.ToRawData();
                 r.WriteToFile(fi.FullName);
@@ -216,7 +220,7 @@ namespace KotOR2RandoConsole
             UnlockDoorInFile(paths, AREA_PER_HANGER   , LABEL_106PEREASTDOOR);
             UnlockDoorInFile(paths, AREA_TEL_RES      , LABEL_203TELAPPTDOOR); 
             UnlockDoorInFile(paths, AREA_TEL_RES      , LABEL_203TELEXCHANGE);
-            UnlockDoorInFile(paths, AREA_TEL_ENTER_WAR, LABEL_222TELRAVAGER); //Broken
+            UnlockDoorInFile(paths, AREA_TEL_ENTER_WAR, LABEL_222TELRAVAGER);
             UnlockDoorInFile(paths, AREA_TEL_ACAD     , LABEL_262TELPLATEAU); 
             UnlockDoorInFile(paths, AREA_NAR_DOCKS    , LABEL_303NARZEZDOOR);
             UnlockDoorInFile(paths, AREA_NAR_JEKK     , LABEL_304NARBACKROOM);
@@ -230,6 +234,107 @@ namespace KotOR2RandoConsole
             EnableDoorTransition(paths, AREA_PER_FUEL, LABEL_103PERTOMININGTUNNELS);
             EnableDoorTransition(paths, AREA_PER_DORMS, LABEL_105PERTOASTROID, AREA_PER_ASTROID);
             EnableDoorTransition(paths, AREA_TEL_ACAD, LABEL_262TELPLATEAU);
+
+            //Add a transition to the Astroid Exterior
+            Add104PERTransition(paths);
+
+            //Add elevator to 901MAL
+            Add901MALEbonElevator(paths);
+        }
+
+        private static void Add104PERTransition(K2Paths paths)
+        {
+            string filename = LookupTable[AREA_PER_ASTROID] + ".rim";
+            var fi = paths.FilesInModules.FirstOrDefault(f => f.Name == filename);
+            if (fi.Exists)
+            {
+                RIM r = new RIM(fi.FullName);   // Open what replaced this the astroid exterior.
+                RIM.rFile rf = r.File_Table.FirstOrDefault(x => x.TypeID == (int)ResourceType.GIT);
+                GFF g = new GFF(rf.File_Data);  // Grab the git out of the file.
+
+                //Create Tranistion Struct
+                GFF.STRUCT TransitionStruct = new GFF.STRUCT("", 1, new List<GFF.FIELD>()
+                {
+                    new GFF.LIST("Geometry", new List<GFF.STRUCT>()
+                    {
+                        new GFF.STRUCT("", 3, new List<GFF.FIELD>()
+                        {
+                            new GFF.FLOAT("PointX", 0.0f),
+                            new GFF.FLOAT("PointY", 0.0f),
+                            new GFF.FLOAT("PointZ", 0.0f)
+                        }),
+                        new GFF.STRUCT("", 3, new List<GFF.FIELD>()
+                        {
+                            new GFF.FLOAT("PointX", 0.0f),
+                            new GFF.FLOAT("PointY", -1.4f),
+                            new GFF.FLOAT("PointZ", 2.0f)
+                        }),
+                        new GFF.STRUCT("", 3, new List<GFF.FIELD>()
+                        {
+                            new GFF.FLOAT("PointX", 6.0f),
+                            new GFF.FLOAT("PointY", -1.4f),
+                            new GFF.FLOAT("PointZ", 2.0f)
+                        }),
+                        new GFF.STRUCT("", 3, new List<GFF.FIELD>()
+                        {
+                            new GFF.FLOAT("PointX", 6.0f),
+                            new GFF.FLOAT("PointY", 0.0f),
+                            new GFF.FLOAT("PointZ", 0.0f)
+                        })
+                    }),
+                    new GFF.CExoString("LinkedTo", "From_104PER"),
+                    new GFF.BYTE("LinkedToFlags", 2),
+                    new GFF.ResRef("LinkedToModule", AREA_PER_FUEL),
+                    new GFF.CExoString("Tag", "To_103PER"),
+                    new GFF.ResRef("TemplateResRef", "newtransition"),
+                    new GFF.CExoLocString("TransitionDestin", 75950, new()),
+                    new GFF.FLOAT("XOrientation", 0.0f),
+                    new GFF.FLOAT("YOrientation", 0.0f),
+                    new GFF.FLOAT("ZOrientation", 0.0f),
+                    new GFF.FLOAT("XPosition", 70.6f),
+                    new GFF.FLOAT("YPosition", -115.1f),
+                    new GFF.FLOAT("ZPosition", 255.0f)
+                });
+
+                (g.Top_Level.Fields.FirstOrDefault(f => f.Label == "TriggerList") as GFF.LIST).Structs.Add(TransitionStruct);
+
+                // Write change(s) to file.
+                rf.File_Data = g.ToRawData();
+                r.WriteToFile(fi.FullName);
+            }
+        }
+        
+        private static void Add901MALEbonElevator(K2Paths paths)
+        {
+            string filename = LookupTable[AREA_MAL_SURFACE] + ".rim";
+            var fi = paths.FilesInModules.FirstOrDefault(f => f.Name == filename);
+            if (fi.Exists)
+            {
+                RIM r = new RIM(fi.FullName);   // Open what replaced this the astroid exterior.
+                RIM.rFile rf = r.File_Table.FirstOrDefault(x => x.TypeID == (int)ResourceType.GIT);
+                GFF g = new GFF(rf.File_Data);  // Grab the git out of the file.
+
+                //Create Tranistion Struct
+                GFF.STRUCT PlaceStruct = new GFF.STRUCT("", 9, new List<GFF.FIELD>()
+                {
+                    new GFF.FLOAT("Bearing", 0.0f),
+                    new GFF.ResRef("TemplateResRef", "ebo_elev"),
+                    new GFF.DWORD("TweakColor",0),
+                    new GFF.BYTE("UseTweakColor",0),
+                    new GFF.FLOAT("X", 6.23f),
+                    new GFF.FLOAT("Y", -24.63f),
+                    new GFF.FLOAT("Z", 84.43f)
+                });
+                (g.Top_Level.Fields.FirstOrDefault(f => f.Label == "Placeable List") as GFF.LIST).Structs.Add(PlaceStruct);
+
+                //Add Placeable and script to overide
+                File.WriteAllBytes(paths.Override + "ebo_elev.utp", Properties.Resources.ebo_elev);
+                File.WriteAllBytes(paths.Override + "r_to003EBO.ncs", Properties.Resources.r_to003EBO);
+
+                // Write change(s) to file.
+                rf.File_Data = g.ToRawData();
+                r.WriteToFile(fi.FullName);
+            }
         }
     }
 }
