@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using KotOR_IO;
 using System.IO;
+using System.Diagnostics;
 
 namespace KotOR2RandoConsole
 {
@@ -58,6 +59,8 @@ namespace KotOR2RandoConsole
 
         public static void Module_rando(K2Paths paths)
         {
+            List<Task> tasks = new();
+
             paths.BackUpModulesDirectory();
             paths.BackUpLipsDirectory();
             paths.BackUpOverrideDirectory();
@@ -69,7 +72,7 @@ namespace KotOR2RandoConsole
 
             // Shuffle the list of included modules.
             List<string> shuffle = new List<string>(RandomizedModules);
-            //Randomize.FisherYatesShuffle(shuffle); 
+            Randomize.FisherYatesShuffle(shuffle); 
             LookupTable.Clear();
 
             for (int i = 0; i < RandomizedModules.Count; i++)
@@ -87,46 +90,40 @@ namespace KotOR2RandoConsole
             // Copy shuffled modules into the base directory.
             foreach (var name in LookupTable)
             {
-                File.Copy($"{paths.modules_backup}{name.Key}.rim", $"{paths.modules}{name.Value}.rim", true);
-                File.Copy($"{paths.modules_backup}{name.Key}_s.rim", $"{paths.modules}{name.Value}_s.rim", true);
-                try { File.Copy($"{paths.lips_backup}{name.Key}_loc.mod", $"{paths.lips}{name.Value}_loc.mod", true); }
-                catch (Exception) {
-                    if (name.Key != name.Value)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.WriteLine($"Skipping lip for {name.Key}, consider omitting?");
-                        Console.ForegroundColor = ConsoleColor.White;
-                    }
-                    
-                }
-                File.Copy($"{paths.modules_backup}{name.Key}_dlg.erf", $"{paths.modules}{name.Value}_dlg.erf", true);
+                tasks.Add(Task.Run(() => File.Copy($"{paths.modules_backup}{name.Key}.rim", $"{paths.modules}{name.Value}.rim", true)));
+                tasks.Add(Task.Run(() => File.Copy($"{paths.modules_backup}{name.Key}_s.rim", $"{paths.modules}{name.Value}_s.rim", true)));
+                if (File.Exists($"{paths.lips_backup}{name.Key}_loc.mod")) 
+                    tasks.Add(Task.Run(() => File.Copy($"{paths.lips_backup}{name.Key}_loc.mod", $"{paths.lips}{name.Value}_loc.mod", true)));
+                tasks.Add(Task.Run(() => File.Copy($"{paths.modules_backup}{name.Key}_dlg.erf", $"{paths.modules}{name.Value}_dlg.erf", true)));
 
                 //TEMPORARY SPOLIERS
                 File.AppendAllText(paths.RANDOMIZED_LOG, $"{name.Key} -> {name.Value}\n");
 
             }
-            File.Copy($"{paths.lips_backup}localization.mod", $"{paths.lips}{"localization.mod"}", true);
+            tasks.Add(Task.Run(() => File.Copy($"{paths.lips_backup}localization.mod", $"{paths.lips}{"localization.mod"}", true)));
             File.AppendAllText(paths.RANDOMIZED_LOG, "----------------\n");
 
             //Misc Patches
-            File.WriteAllBytes(paths.Override + "a_disc_join.ncs", Properties.Resources.a_disc_join); //Disciple Crash Patch
-
-            //Unlock Door
-            if (Properties.UserSettings.Default.DoorUnlocks)
-            {
-                UnlockDoors(paths);
-            }
+            tasks.Add(Task.Run(() => File.WriteAllBytes(paths.Override + "a_disc_join.ncs", Properties.Resources.a_disc_join))); //Disciple Crash Patch
 
             //Unlock Galxy Map
             if (Properties.UserSettings.Default.GalaxyMapUnlocked)
             {
-                File.WriteAllBytes(paths.Override + "a_galaxymap.ncs", Properties.Resources.a_galaxymap);
+                tasks.Add(Task.Run(() => File.WriteAllBytes(paths.Override + "a_galaxymap.ncs", Properties.Resources.a_galaxymap)));
             }
 
             //Module Save Patch
             if (Properties.UserSettings.Default.ModuleSavePatch)
             {
-                File.WriteAllBytes(paths.Override + "modulesave.2da", Properties.Resources.modulesave);
+                tasks.Add(Task.Run(() => File.WriteAllBytes(paths.Override + "modulesave.2da", Properties.Resources.modulesave)));
+            }
+
+            Task.WhenAll(tasks).Wait();
+
+            //Unlock Doors
+            if (Properties.UserSettings.Default.DoorUnlocks)
+            {
+                UnlockDoors(paths);
             }
         }
 

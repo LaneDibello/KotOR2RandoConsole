@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Diagnostics;
 
 namespace KotOR2RandoConsole
 {
@@ -181,8 +182,12 @@ namespace KotOR2RandoConsole
             //Modules
             if (Properties.UserSettings.Default.DoModuleRando)
             {
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
                 Console.WriteLine("Randomizing Modules...");
                 ModuleRando.Module_rando(paths);
+                sw.Stop();
+                Console.WriteLine($"Module rando took {sw.Elapsed.TotalSeconds} seconds.");
             }
 
             //Items
