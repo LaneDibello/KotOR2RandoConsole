@@ -17,4 +17,17 @@ namespace KotOR2RandoConsole
         /// <summary> Randomize with everything else set to Max. </summary>
         Max = 3,
     }
+
+    public static class Globals
+    {
+        public static readonly Dictionary<string, Tuple<float, float, float>> FIXED_COORDINATES = new Dictionary<string, Tuple<float, float, float>>()
+        {
+            { "202TEL", new Tuple<float, float, float>(
+                (-13.5f),
+                (-63.4f),
+                (11.51f)) },
+        };
+    }
+
+    
 }

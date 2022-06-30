@@ -119,7 +119,7 @@
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="a_disc_join" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\a_disc_join.ncs;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\Patches\a_disc_join.ncs;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="a_galaxymap" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Patches\a_galaxymap.ncs;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
@@ -128,9 +128,18 @@
     <value>..\Patches\ebo_elev.utp;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="modulesave" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\modulesave.2da;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\Patches\modulesave.2da;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="r_to003EBO" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Patches\r_to003EBO.ncs;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="r_to003EBOelev" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Patches\r_to003EBOelev.ncs;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="r_to003EBOentr" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Patches\r_to003EBOentr.ncs;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="r_to950COR" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Patches\r_to950COR.ncs;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="_262exit" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Patches\262exit.dlg;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

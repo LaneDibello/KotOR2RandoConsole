@@ -25,6 +25,7 @@ namespace KotOR2RandoConsole
         private static readonly string AREA_NAR_JEKK      = "304NAR";
         private static readonly string AREA_NAR_J_TUNNELS = "305NAR";
         private static readonly string AREA_NAR_G0T0      = "351NAR";
+        private static readonly string AREA_DXN_MANDO     = "403DXN"; 
         private static readonly string AREA_DAN_COURTYARD = "605DAN";
         private static readonly string AREA_KOR_ACAD      = "702KOR";
         private static readonly string AREA_KOR_SHY       = "710KOR";
@@ -48,7 +49,9 @@ namespace KotOR2RandoConsole
 		private const string LABEL_304NARBACKROOM = "visquisdoor";           // Door in Jekk'Jekk Tarr leading to Visquis's private suit, and the Tunnels
 		private const string LABEL_305NARTOJEKKJEKK = "door_narshad002";     // Leave the tunnels and return to the cantina for once
 		private const string LABEL_351NARG0T0EBONHAWK = "door_narshad008";   // Reboard the Ebon Hawk without doing the entirity of G0T0's yacht, though the CS it leads to breaks frequently, look into other options
-		private const string LABEL_605DANREBUILTENCLAVE = "door_650";        // Enter the Rebuilt Jedi Enclave Early
+        private const string LABEL_403BASALISKDOOR = "hangar_door2";         // Door to access the Basilisk War droid hanger
+        private const string LABEL_403SHUTTLEIZIZ = "shuttle_iziz";          // Shuttle Mandalore takes to Iziz
+        private const string LABEL_605DANREBUILTENCLAVE = "door_650";        // Enter the Rebuilt Jedi Enclave Early
 		private const string LABEL_702KORVALLEY = "door_enter";              // Leave the Sith acadmeny without doing 10 minutes of puzzles or a DLZ
 		private const string LABEL_710KORLUDOKRESSH = "sealeddoor";          // Enter the secret tomb in the shyrack cave without heavy alignment
         #endregion
@@ -67,12 +70,13 @@ namespace KotOR2RandoConsole
             OmittedModules = new(File.ReadAllLines("OmitMods.txt").Distinct());
             if (OmittedModules.Last() == "") OmittedModules.RemoveAt(OmittedModules.Count - 1);
 
-            var modules = paths.FilesInModules.Where(m => !OmittedModules.Contains(m.Name.Substring(0, 6)));
+            //Check extension to skip non rim/erf files in the directory (only applies to modded games)
+            var modules = paths.FilesInModules.Where(m => !OmittedModules.Contains(m.Name.Substring(0, 6)) && (m.Extension == ".rim" || m.Extension == ".erf"));
             RandomizedModules = new(modules.Select(m => m.Name.Substring(0, 6)).Distinct());
 
             // Shuffle the list of included modules.
             List<string> shuffle = new List<string>(RandomizedModules);
-            Randomize.FisherYatesShuffle(shuffle); 
+            //Randomize.FisherYatesShuffle(shuffle); 
             LookupTable.Clear();
 
             for (int i = 0; i < RandomizedModules.Count; i++)
@@ -105,6 +109,9 @@ namespace KotOR2RandoConsole
 
             //Misc Patches
             tasks.Add(Task.Run(() => File.WriteAllBytes(paths.Override + "a_disc_join.ncs", Properties.Resources.a_disc_join))); //Disciple Crash Patch
+            tasks.Add(Task.Run(() => File.WriteAllBytes(paths.Override + "262exit.dlg", Properties.Resources._262exit))); // Ebon DLG for polar acad
+            tasks.Add(Task.Run(() => File.WriteAllBytes(paths.Override + "r_to003EBOentr.ncs", Properties.Resources.r_to003EBOentr))); // Enter Ebon Script
+            tasks.Add(Task.Run(() => File.WriteAllBytes(paths.Override + "r_to950COR.ncs", Properties.Resources.r_to950COR))); // COR CS script
 
             //Unlock Galxy Map
             if (Properties.UserSettings.Default.GalaxyMapUnlocked)
@@ -125,6 +132,9 @@ namespace KotOR2RandoConsole
             {
                 UnlockDoors(paths);
             }
+
+            //Fix Warp Coordinates
+            FixWarpCoordinates(paths);
         }
 
         /// <summary>
@@ -142,21 +152,24 @@ namespace KotOR2RandoConsole
                 // Skip any files that aren't the default format.
                 if (fi.Name.Length > 10) { continue; }
 
-                RIM r = new RIM(fi.FullName);   // Open what replaced this area.
-                RIM.rFile rf = r.File_Table.FirstOrDefault(x => x.TypeID == (int)ResourceType.GIT);
-                GFF g = new GFF(rf.File_Data);  // Grab the git out of the file.
-
-                //Get ready for the nastiest Linq query you've ever seen, we may want to clean this up some
-                ((g.Top_Level.Fields.FirstOrDefault(x => x.Label == "Door List") as GFF.LIST).Structs.FirstOrDefault(y => (y.Fields.FirstOrDefault(z => z.Label == "TemplateResRef") as GFF.ResRef).Reference == label).Fields.FirstOrDefault(a => a.Label == "LinkedToFlags") as GFF.BYTE).Value = 2;
-
-                if (destination is not null)
+                lock (area)
                 {
-                    ((g.Top_Level.Fields.FirstOrDefault(x => x.Label == "Door List") as GFF.LIST).Structs.FirstOrDefault(y => (y.Fields.FirstOrDefault(z => z.Label == "TemplateResRef") as GFF.ResRef).Reference == label).Fields.FirstOrDefault(a => a.Label == "LinkedToModule") as GFF.ResRef).Reference = destination;
-                }
+                    RIM r = new RIM(fi.FullName);   // Open what replaced this area.
+                    RIM.rFile rf = r.File_Table.FirstOrDefault(x => x.TypeID == (int)ResourceType.GIT);
+                    GFF g = new GFF(rf.File_Data);  // Grab the git out of the file.
 
-                // Write change(s) to file.
-                rf.File_Data = g.ToRawData();
-                r.WriteToFile(fi.FullName);
+                    //Get ready for the nastiest Linq query you've ever seen, we may want to clean this up some
+                    ((g.Top_Level.Fields.FirstOrDefault(x => x.Label == "Door List") as GFF.LIST).Structs.FirstOrDefault(y => (y.Fields.FirstOrDefault(z => z.Label == "TemplateResRef") as GFF.ResRef).Reference == label).Fields.FirstOrDefault(a => a.Label == "LinkedToFlags") as GFF.BYTE).Value = 2;
+
+                    if (destination is not null)
+                    {
+                        ((g.Top_Level.Fields.FirstOrDefault(x => x.Label == "Door List") as GFF.LIST).Structs.FirstOrDefault(y => (y.Fields.FirstOrDefault(z => z.Label == "TemplateResRef") as GFF.ResRef).Reference == label).Fields.FirstOrDefault(a => a.Label == "LinkedToModule") as GFF.ResRef).Reference = destination;
+                    }
+
+                    // Write change(s) to file.
+                    rf.File_Data = g.ToRawData();
+                    r.WriteToFile(fi.FullName);
+                }
             }
         }
 
@@ -228,29 +241,35 @@ namespace KotOR2RandoConsole
             tasks.Add(Task.Run(() => UnlockDoorInFile(paths, AREA_NAR_JEKK     , LABEL_304NARBACKROOM)));
             tasks.Add(Task.Run(() => UnlockDoorInFile(paths, AREA_NAR_J_TUNNELS, LABEL_305NARTOJEKKJEKK)));
             tasks.Add(Task.Run(() => UnlockDoorInFile(paths, AREA_NAR_G0T0     , LABEL_351NARG0T0EBONHAWK)));
+            tasks.Add(Task.Run(() => UnlockDoorInFile(paths, AREA_DXN_MANDO    , LABEL_403BASALISKDOOR)));
             tasks.Add(Task.Run(() => UnlockDoorInFile(paths, AREA_DAN_COURTYARD, LABEL_605DANREBUILTENCLAVE)));
             tasks.Add(Task.Run(() => UnlockDoorInFile(paths, AREA_KOR_ACAD     , LABEL_702KORVALLEY)));
             tasks.Add(Task.Run(() => UnlockDoorInFile(paths, AREA_KOR_SHY      , LABEL_710KORLUDOKRESSH)));
 
-            Task.WhenAll(tasks).Wait();
-
             //Enable tranistions for these doors with linking modules but no flags
-            EnableDoorTransition(paths, AREA_PER_FUEL, LABEL_103PERTOMININGTUNNELS);
-            EnableDoorTransition(paths, AREA_PER_DORMS, LABEL_105PERTOASTROID, AREA_PER_ASTROID);
-            EnableDoorTransition(paths, AREA_TEL_ACAD, LABEL_262TELPLATEAU);
+            tasks.Add(Task.Run(() => EnableDoorTransition(paths, AREA_PER_FUEL, LABEL_103PERTOMININGTUNNELS)));
+            tasks.Add(Task.Run(() => EnableDoorTransition(paths, AREA_PER_DORMS, LABEL_105PERTOASTROID, AREA_PER_ASTROID)));
+            tasks.Add(Task.Run(() => EnableDoorTransition(paths, AREA_TEL_ACAD, LABEL_262TELPLATEAU)));
 
             //Add a transition to the Astroid Exterior
-            Add104PERTransition(paths);
+            tasks.Add(Task.Run(() => Add104PERTransition(paths)));
+
+            //Enable the shuttle to Iziz from teh mando camp
+            tasks.Add(Task.Run(() => Add403DXNShuttleIziz(paths)));
 
             //Add elevator to 901MAL
-            Add901MALEbonElevator(paths);
+            tasks.Add(Task.Run(() => Add901MALEbonElevator(paths)));
+
+
+            Task.WhenAll(tasks).Wait();
         }
 
         private static void Add104PERTransition(K2Paths paths)
         {
             string filename = LookupTable[AREA_PER_ASTROID] + ".rim";
             var fi = paths.FilesInModules.FirstOrDefault(f => f.Name == filename);
-            if (fi.Exists)
+            if (!fi.Exists) return;
+            lock (AREA_PER_ASTROID)
             {
                 RIM r = new RIM(fi.FullName);   // Open what replaced this the astroid exterior.
                 RIM.rFile rf = r.File_Table.FirstOrDefault(x => x.TypeID == (int)ResourceType.GIT);
@@ -307,38 +326,90 @@ namespace KotOR2RandoConsole
                 r.WriteToFile(fi.FullName);
             }
         }
-        
-        private static void Add901MALEbonElevator(K2Paths paths)
+        private static void Add403DXNShuttleIziz(K2Paths paths)
         {
-            string filename = LookupTable[AREA_MAL_SURFACE] + ".rim";
+            string filename = LookupTable[AREA_DXN_MANDO] + "_s.rim";
             var fi = paths.FilesInModules.FirstOrDefault(f => f.Name == filename);
-            if (fi.Exists)
+            if (!fi.Exists) return;
+            lock (AREA_DXN_MANDO)
             {
                 RIM r = new RIM(fi.FullName);   // Open what replaced this the astroid exterior.
-                RIM.rFile rf = r.File_Table.FirstOrDefault(x => x.TypeID == (int)ResourceType.GIT);
+                RIM.rFile rf = r.File_Table.FirstOrDefault(x => x.TypeID == (int)ResourceType.UTP && x.Label == LABEL_403SHUTTLEIZIZ);
                 GFF g = new GFF(rf.File_Data);  // Grab the git out of the file.
 
-                //Create Tranistion Struct
-                GFF.STRUCT PlaceStruct = new GFF.STRUCT("", 9, new List<GFF.FIELD>()
-                {
-                    new GFF.FLOAT("Bearing", 0.0f),
-                    new GFF.ResRef("TemplateResRef", "ebo_elev"),
-                    new GFF.DWORD("TweakColor",0),
-                    new GFF.BYTE("UseTweakColor",0),
-                    new GFF.FLOAT("X", 6.23f),
-                    new GFF.FLOAT("Y", -24.63f),
-                    new GFF.FLOAT("Z", 84.43f)
-                });
-                (g.Top_Level.Fields.FirstOrDefault(f => f.Label == "Placeable List") as GFF.LIST).Structs.Add(PlaceStruct);
-
-                //Add Placeable and script to overide
-                File.WriteAllBytes(paths.Override + "ebo_elev.utp", Properties.Resources.ebo_elev);
-                File.WriteAllBytes(paths.Override + "r_to003EBO.ncs", Properties.Resources.r_to003EBO);
+                //Just set clicking to take to iziz
+                (g.Top_Level.Fields.FirstOrDefault(x => x.Label == "OnUsed") as GFF.ResRef).Reference = "a_to_iziz2";
 
                 // Write change(s) to file.
                 rf.File_Data = g.ToRawData();
                 r.WriteToFile(fi.FullName);
             }
         }
+        private static void Add901MALEbonElevator(K2Paths paths)
+        {
+            string filename = LookupTable[AREA_MAL_SURFACE] + ".rim";
+            var fi = paths.FilesInModules.FirstOrDefault(f => f.Name == filename);
+            if (fi.Exists)
+            {
+                lock(AREA_MAL_SURFACE)
+                {
+                    RIM r = new RIM(fi.FullName);   // Open what replaced this the astroid exterior.
+                    RIM.rFile rf = r.File_Table.FirstOrDefault(x => x.TypeID == (int)ResourceType.GIT);
+                    GFF g = new GFF(rf.File_Data);  // Grab the git out of the file.
+
+                    //Create Tranistion Struct
+                    GFF.STRUCT PlaceStruct = new GFF.STRUCT("", 9, new List<GFF.FIELD>()
+                    {
+                        new GFF.FLOAT("Bearing", 0.0f),
+                        new GFF.ResRef("TemplateResRef", "ebo_elev"),
+                        new GFF.DWORD("TweakColor",0),
+                        new GFF.BYTE("UseTweakColor",0),
+                        new GFF.FLOAT("X", 6.23f),
+                        new GFF.FLOAT("Y", -24.63f),
+                        new GFF.FLOAT("Z", 84.43f)
+                    });
+                    (g.Top_Level.Fields.FirstOrDefault(f => f.Label == "Placeable List") as GFF.LIST).Structs.Add(PlaceStruct);
+
+                    //Add Placeable and script to overide
+                    File.WriteAllBytes(paths.Override + "ebo_elev.utp", Properties.Resources.ebo_elev);
+                    File.WriteAllBytes(paths.Override + "r_to003EBOelev.ncs", Properties.Resources.r_to003EBOelev);
+
+                    // Write change(s) to file.
+                    rf.File_Data = g.ToRawData();
+                    r.WriteToFile(fi.FullName);
+                }
+            }
+        }
+        /// <summary>
+        /// Update warp coordinates that are in bad locations by default.
+        /// </summary>
+        /// <param name="paths">KPaths object for this game.</param>
+        private static void FixWarpCoordinates(K2Paths paths)
+        {
+            // Create a lookup for modules needing coordinate fix with their newly shuffled FileInfos.
+            var shuffleFileLookup = new Dictionary<string, FileInfo>();
+            foreach (var key in Globals.FIXED_COORDINATES.Keys)
+            {
+                shuffleFileLookup.Add(key, paths.FilesInModules.FirstOrDefault(fi => fi.Name.Contains(LookupTable[key]) && fi.Extension == ".rim"));
+            }
+
+            foreach (var kvp in shuffleFileLookup)
+            {
+                // Set up objects.
+                RIM r = new RIM(kvp.Value.FullName);
+                RIM.rFile rf = r.File_Table.FirstOrDefault(x => x.TypeID == (int)ResourceType.IFO);
+
+                GFF g = new GFF(rf.File_Data);
+
+                // Update coordinate data.
+                (g.Top_Level.Fields.FirstOrDefault(x => x.Label == "Mod_Entry_X") as GFF.FLOAT).Value = Globals.FIXED_COORDINATES[kvp.Key].Item1;
+                (g.Top_Level.Fields.FirstOrDefault(x => x.Label == "Mod_Entry_Y") as GFF.FLOAT).Value = Globals.FIXED_COORDINATES[kvp.Key].Item2;
+                (g.Top_Level.Fields.FirstOrDefault(x => x.Label == "Mod_Entry_Z") as GFF.FLOAT).Value = Globals.FIXED_COORDINATES[kvp.Key].Item3;
+
+                // Write updated data to RIM file.
+                rf.File_Data = g.ToRawData();
+                r.WriteToFile(kvp.Value.FullName);
+            }
+        }
     }
-}
+}   
