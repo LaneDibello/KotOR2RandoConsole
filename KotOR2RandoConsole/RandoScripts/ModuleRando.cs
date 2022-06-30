@@ -13,22 +13,22 @@ namespace KotOR2RandoConsole
     {
         #region Constants
         //Zones
-        private const string AREA_PER_ADMIN     = "101PER";
-        private const string AREA_PER_FUEL      = "103PER";
-        private const string AREA_PER_ASTROID   = "104PER";
-        private const string AREA_PER_DORMS     = "105PER";
-        private const string AREA_PER_HANGER    = "106PER";
-        private const string AREA_TEL_RES       = "203TEL";
-        private const string AREA_TEL_ENTER_WAR = "222TEL";
-        private const string AREA_TEL_ACAD      = "262TEL";
-        private const string AREA_NAR_DOCKS     = "303NAR";
-        private const string AREA_NAR_JEKK      = "304NAR";
-        private const string AREA_NAR_J_TUNNELS = "305NAR";
-        private const string AREA_NAR_G0T0      = "351NAR";
-        private const string AREA_DAN_COURTYARD = "605DAN";
-        private const string AREA_KOR_ACAD      = "702KOR";
-        private const string AREA_KOR_SHY       = "710KOR";
-        private const string AREA_MAL_SURFACE   = "901MAL";
+        private static readonly string AREA_PER_ADMIN     = "101PER";
+        private static readonly string AREA_PER_FUEL      = "103PER";
+        private static readonly string AREA_PER_ASTROID   = "104PER";
+        private static readonly string AREA_PER_DORMS     = "105PER";
+        private static readonly string AREA_PER_HANGER    = "106PER";
+        private static readonly string AREA_TEL_RES       = "203TEL";
+        private static readonly string AREA_TEL_ENTER_WAR = "222TEL";
+        private static readonly string AREA_TEL_ACAD      = "262TEL";
+        private static readonly string AREA_NAR_DOCKS     = "303NAR";
+        private static readonly string AREA_NAR_JEKK      = "304NAR";
+        private static readonly string AREA_NAR_J_TUNNELS = "305NAR";
+        private static readonly string AREA_NAR_G0T0      = "351NAR";
+        private static readonly string AREA_DAN_COURTYARD = "605DAN";
+        private static readonly string AREA_KOR_ACAD      = "702KOR";
+        private static readonly string AREA_KOR_SHY       = "710KOR";
+        private static readonly string AREA_MAL_SURFACE   = "901MAL";
 
         //Locked Doors
         private const string LABEL_101PERTODORMS = "sw_door_per006";         // Dorms from Admin
@@ -118,7 +118,7 @@ namespace KotOR2RandoConsole
                 tasks.Add(Task.Run(() => File.WriteAllBytes(paths.Override + "modulesave.2da", Properties.Resources.modulesave)));
             }
 
-            Task.WhenAll(tasks).Wait();
+            Task.WhenAll(tasks).Wait(); //Wait on the tasks here because door unlocks rely on the modules being randomized
 
             //Unlock Doors
             if (Properties.UserSettings.Default.DoorUnlocks)
@@ -168,34 +168,37 @@ namespace KotOR2RandoConsole
         /// <param name="label">Label of the door to unlock.</param>
         private static void UnlockDoorInFile(K2Paths paths, string area, string label)
         {
+
             var areaFiles = paths.FilesInModules.Where(fi => fi.Name.Contains(LookupTable[area]));
             foreach (FileInfo fi in areaFiles)
             {
                 // Skip any files that don't end in "s.rim".
                 if (fi.Name[fi.Name.Length - 5] != 's') { continue; }
+                lock (area)
+                {
+                    RIM r = new RIM(fi.FullName);   // Open what replaced this area.
+                    RIM.rFile rf = r.File_Table.FirstOrDefault(x => x.TypeID == (int)ResourceType.UTD && x.Label == label);
+                    GFF g = new GFF(rf.File_Data);  // Grab the door out of the file.
 
-                RIM r = new RIM(fi.FullName);   // Open what replaced this area.
-                RIM.rFile rf = r.File_Table.FirstOrDefault(x => x.TypeID == (int)ResourceType.UTD && x.Label == label);
-                GFF g = new GFF(rf.File_Data);  // Grab the door out of the file.
+                    // Set fields related to opening and unlocking.
+                    (g.Top_Level.Fields.FirstOrDefault(x => x.Label == "KeyRequired") as GFF.BYTE).Value = 0;
+                    (g.Top_Level.Fields.FirstOrDefault(x => x.Label == "Locked") as GFF.BYTE).Value = 0;
+                    (g.Top_Level.Fields.FirstOrDefault(x => x.Label == "OpenLockDC") as GFF.BYTE).Value = 0;
+                    (g.Top_Level.Fields.FirstOrDefault(x => x.Label == "Plot") as GFF.BYTE).Value = 0;
 
-                // Set fields related to opening and unlocking.
-                (g.Top_Level.Fields.FirstOrDefault(x => x.Label == "KeyRequired") as GFF.BYTE).Value = 0;
-                (g.Top_Level.Fields.FirstOrDefault(x => x.Label == "Locked") as GFF.BYTE).Value = 0;
-                (g.Top_Level.Fields.FirstOrDefault(x => x.Label == "OpenLockDC") as GFF.BYTE).Value = 0;
-                (g.Top_Level.Fields.FirstOrDefault(x => x.Label == "Plot") as GFF.BYTE).Value = 0;
+                    // Set fields related to bashing open.
+                    (g.Top_Level.Fields.FirstOrDefault(x => x.Label == "Hardness") as GFF.BYTE).Value = 0;
+                    (g.Top_Level.Fields.FirstOrDefault(x => x.Label == "HP") as GFF.SHORT).Value = 1;
+                    (g.Top_Level.Fields.FirstOrDefault(x => x.Label == "CurrentHP") as GFF.SHORT).Value = 1;
+                    (g.Top_Level.Fields.FirstOrDefault(x => x.Label == "Min1HP") as GFF.BYTE).Value = 0;
 
-                // Set fields related to bashing open.
-                (g.Top_Level.Fields.FirstOrDefault(x => x.Label == "Hardness") as GFF.BYTE).Value = 0;
-                (g.Top_Level.Fields.FirstOrDefault(x => x.Label == "HP") as GFF.SHORT).Value = 1;
-                (g.Top_Level.Fields.FirstOrDefault(x => x.Label == "CurrentHP") as GFF.SHORT).Value = 1;
-                (g.Top_Level.Fields.FirstOrDefault(x => x.Label == "Min1HP") as GFF.BYTE).Value = 0;
+                    //Set Fields related to interacting
+                    (g.Top_Level.Fields.FirstOrDefault(x => x.Label == "Static") as GFF.BYTE).Value = 0;
 
-                //Set Fields related to interacting
-                (g.Top_Level.Fields.FirstOrDefault(x => x.Label == "Static") as GFF.BYTE).Value = 0;
-
-                // Write change(s) to file.
-                rf.File_Data = g.ToRawData();
-                r.WriteToFile(fi.FullName);
+                    // Write change(s) to file.
+                    rf.File_Data = g.ToRawData();
+                    r.WriteToFile(fi.FullName);
+                }
             }
         }
 
@@ -205,27 +208,31 @@ namespace KotOR2RandoConsole
         /// <param name="paths">KPaths object for this game.</param>
         private static void UnlockDoors(K2Paths paths)
         {
+            List<Task> tasks = new();
+
             //In the future these'll be split into options, but for now here's all of them
-            UnlockDoorInFile(paths, AREA_PER_ADMIN    , LABEL_101PERTODORMS);
-            UnlockDoorInFile(paths, AREA_PER_ADMIN    , LABEL_101PERTOMININGTUNNELS);
-            UnlockDoorInFile(paths, AREA_PER_ADMIN    , LABEL_101PERTOFUELDEPOT);
-            UnlockDoorInFile(paths, AREA_PER_ADMIN    , LABEL_101PERTOHARBINGER);
-            UnlockDoorInFile(paths, AREA_PER_FUEL     , LABEL_103PERTOMININGTUNNELS);
-            UnlockDoorInFile(paths, AREA_PER_FUEL     , LABEL_103PERFORCESHIELDS);
-            UnlockDoorInFile(paths, AREA_PER_FUEL     , LABEL_103PERSHIELD2);
-            UnlockDoorInFile(paths, AREA_PER_DORMS    , LABEL_105PERTOASTROID);
-            UnlockDoorInFile(paths, AREA_PER_HANGER   , LABEL_106PEREASTDOOR);
-            UnlockDoorInFile(paths, AREA_TEL_RES      , LABEL_203TELAPPTDOOR); 
-            UnlockDoorInFile(paths, AREA_TEL_RES      , LABEL_203TELEXCHANGE);
-            UnlockDoorInFile(paths, AREA_TEL_ENTER_WAR, LABEL_222TELRAVAGER);
-            UnlockDoorInFile(paths, AREA_TEL_ACAD     , LABEL_262TELPLATEAU); 
-            UnlockDoorInFile(paths, AREA_NAR_DOCKS    , LABEL_303NARZEZDOOR);
-            UnlockDoorInFile(paths, AREA_NAR_JEKK     , LABEL_304NARBACKROOM);
-            UnlockDoorInFile(paths, AREA_NAR_J_TUNNELS, LABEL_305NARTOJEKKJEKK);
-            UnlockDoorInFile(paths, AREA_NAR_G0T0     , LABEL_351NARG0T0EBONHAWK);
-            UnlockDoorInFile(paths, AREA_DAN_COURTYARD, LABEL_605DANREBUILTENCLAVE);
-            UnlockDoorInFile(paths, AREA_KOR_ACAD     , LABEL_702KORVALLEY);
-            UnlockDoorInFile(paths, AREA_KOR_SHY      , LABEL_710KORLUDOKRESSH);
+            tasks.Add(Task.Run(() => UnlockDoorInFile(paths, AREA_PER_ADMIN    , LABEL_101PERTODORMS)));
+            tasks.Add(Task.Run(() => UnlockDoorInFile(paths, AREA_PER_ADMIN    , LABEL_101PERTOMININGTUNNELS)));
+            tasks.Add(Task.Run(() => UnlockDoorInFile(paths, AREA_PER_ADMIN    , LABEL_101PERTOFUELDEPOT)));
+            tasks.Add(Task.Run(() => UnlockDoorInFile(paths, AREA_PER_ADMIN    , LABEL_101PERTOHARBINGER)));
+            tasks.Add(Task.Run(() => UnlockDoorInFile(paths, AREA_PER_FUEL     , LABEL_103PERTOMININGTUNNELS)));
+            tasks.Add(Task.Run(() => UnlockDoorInFile(paths, AREA_PER_FUEL     , LABEL_103PERFORCESHIELDS)));
+            tasks.Add(Task.Run(() => UnlockDoorInFile(paths, AREA_PER_FUEL     , LABEL_103PERSHIELD2)));
+            tasks.Add(Task.Run(() => UnlockDoorInFile(paths, AREA_PER_DORMS    , LABEL_105PERTOASTROID)));
+            tasks.Add(Task.Run(() => UnlockDoorInFile(paths, AREA_PER_HANGER   , LABEL_106PEREASTDOOR)));
+            tasks.Add(Task.Run(() => UnlockDoorInFile(paths, AREA_TEL_RES      , LABEL_203TELAPPTDOOR)));
+            tasks.Add(Task.Run(() => UnlockDoorInFile(paths, AREA_TEL_RES      , LABEL_203TELEXCHANGE)));
+            tasks.Add(Task.Run(() => UnlockDoorInFile(paths, AREA_TEL_ENTER_WAR, LABEL_222TELRAVAGER)));
+            tasks.Add(Task.Run(() => UnlockDoorInFile(paths, AREA_TEL_ACAD     , LABEL_262TELPLATEAU)));
+            tasks.Add(Task.Run(() => UnlockDoorInFile(paths, AREA_NAR_DOCKS    , LABEL_303NARZEZDOOR)));
+            tasks.Add(Task.Run(() => UnlockDoorInFile(paths, AREA_NAR_JEKK     , LABEL_304NARBACKROOM)));
+            tasks.Add(Task.Run(() => UnlockDoorInFile(paths, AREA_NAR_J_TUNNELS, LABEL_305NARTOJEKKJEKK)));
+            tasks.Add(Task.Run(() => UnlockDoorInFile(paths, AREA_NAR_G0T0     , LABEL_351NARG0T0EBONHAWK)));
+            tasks.Add(Task.Run(() => UnlockDoorInFile(paths, AREA_DAN_COURTYARD, LABEL_605DANREBUILTENCLAVE)));
+            tasks.Add(Task.Run(() => UnlockDoorInFile(paths, AREA_KOR_ACAD     , LABEL_702KORVALLEY)));
+            tasks.Add(Task.Run(() => UnlockDoorInFile(paths, AREA_KOR_SHY      , LABEL_710KORLUDOKRESSH)));
+
+            Task.WhenAll(tasks).Wait();
 
             //Enable tranistions for these doors with linking modules but no flags
             EnableDoorTransition(paths, AREA_PER_FUEL, LABEL_103PERTOMININGTUNNELS);
