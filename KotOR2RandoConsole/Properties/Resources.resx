@@ -145,6 +145,9 @@
   <data name="_200_info_term" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Patches\200_info_term.dlg;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="_231sntry" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Patches\231sntry.dlg;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="_262exit" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Patches\262exit.dlg;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

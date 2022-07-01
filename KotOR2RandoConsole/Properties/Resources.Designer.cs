@@ -73,6 +73,16 @@ namespace KotOR2RandoConsole.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        public static byte[] _231sntry {
+            get {
+                object obj = ResourceManager.GetObject("_231sntry", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         public static byte[] _262exit {
             get {
                 object obj = ResourceManager.GetObject("_262exit", resourceCulture);

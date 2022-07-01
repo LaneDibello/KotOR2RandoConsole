@@ -112,6 +112,7 @@ namespace KotOR2RandoConsole
             tasks.Add(Task.Run(() => File.WriteAllBytes(paths.Override + "262exit.dlg", Properties.Resources._262exit))); // Ebon DLG for polar acad
             tasks.Add(Task.Run(() => File.WriteAllBytes(paths.Override + "r_to003EBOentr.ncs", Properties.Resources.r_to003EBOentr))); // Enter Ebon Script
             tasks.Add(Task.Run(() => File.WriteAllBytes(paths.Override + "r_to950COR.ncs", Properties.Resources.r_to950COR))); // COR CS script
+            tasks.Add(Task.Run(() => File.WriteAllBytes(paths.Override + "231sntry.dlg", Properties.Resources._231sntry))); // Restoration Zone Bao Dur convo
 
             //Unlock Galxy Map
             if (Properties.UserSettings.Default.GalaxyMapUnlocked)
