@@ -76,7 +76,7 @@ namespace KotOR2RandoConsole
 
             // Shuffle the list of included modules.
             List<string> shuffle = new List<string>(RandomizedModules);
-            //Randomize.FisherYatesShuffle(shuffle); 
+            Randomize.FisherYatesShuffle(shuffle); 
             LookupTable.Clear();
 
             for (int i = 0; i < RandomizedModules.Count; i++)
@@ -127,6 +127,9 @@ namespace KotOR2RandoConsole
 
             Task.WhenAll(tasks).Wait(); //Wait on the tasks here because door unlocks rely on the modules being randomized
 
+            //Telos info terminals
+            var InfoTermTask = Task.Run(() => FixTELInfoTerm(paths));
+
             //Unlock Doors
             if (Properties.UserSettings.Default.DoorUnlocks)
             {
@@ -135,6 +138,8 @@ namespace KotOR2RandoConsole
 
             //Fix Warp Coordinates
             FixWarpCoordinates(paths);
+
+            InfoTermTask.Wait();
         }
 
         /// <summary>
@@ -410,6 +415,45 @@ namespace KotOR2RandoConsole
                 rf.File_Data = g.ToRawData();
                 r.WriteToFile(kvp.Value.FullName);
             }
+        }
+
+        private static void FixTELInfoTerm(K2Paths paths)
+        {
+            // Grab the info terminal dialog
+            GFF g = new GFF(Properties.Resources._200_info_term);
+            // Loop through the conversation reply list
+            foreach (var reply in (g.Top_Level.Fields.FirstOrDefault(f => f.Label == "ReplyList") as GFF.LIST).Structs)
+            {
+                // Loop through entries tied to this reply that run the conditional script 'c_modname_comp"
+                foreach (var entry in (reply.Fields.FirstOrDefault(
+                    f => f.Label == "EntriesList") as GFF.LIST).Structs.Where(
+                        s => s.Fields.Any(
+                            f => f.Type == GffFieldType.ResRef && (f as GFF.ResRef).Reference == "c_modname_comp"
+                            )
+                        )
+                    )
+                {
+                    // Use the look-up table to update the scritp parameter
+                    string? old = (entry.Fields.FirstOrDefault(f => f.Label == "ParamStrA") as GFF.CExoString).CEString;
+                    if (old is not null && old.Length > 1)
+                        (entry.Fields.FirstOrDefault(f => f.Label == "ParamStrA") as GFF.CExoString).CEString = LookupTable[old];
+                    old = (entry.Fields.FirstOrDefault(f => f.Label == "ParamStrB") as GFF.CExoString).CEString;
+                    if (old is not null && old.Length > 1)
+                        (entry.Fields.FirstOrDefault(f => f.Label == "ParamStrB") as GFF.CExoString).CEString = LookupTable[old];
+                }
+            }
+            File.WriteAllBytes(paths.Override + "200_info_term.dlg", g.ToRawData());
+
+            // Next we doctor the script that sets the modules availabel to travel to
+            byte[] globalsetscript = Properties.Resources.a_tel_globalset;
+            for (int i = 0; i < 6; i++)
+            {
+                globalsetscript[54  + i] = (byte)LookupTable["201TEL"][i]; // Seek to and overwrite 201TEL module identifier
+                globalsetscript[117 + i] = (byte)LookupTable["202TEL"][i]; // Seek to and overwrite 202TEL module identifier
+                globalsetscript[180 + i] = (byte)LookupTable["203TEL"][i]; // Seek to and overwrite 203TEL module identifier
+                globalsetscript[243 + i] = (byte)LookupTable["204TEL"][i]; // Seek to and overwrite 204TEL module identifier
+            }
+            File.WriteAllBytes(paths.Override + "a_tel_globalset.ncs", globalsetscript);
         }
     }
 }   
