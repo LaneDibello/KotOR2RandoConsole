@@ -31,6 +31,8 @@ namespace KotOR2RandoConsole
         private static readonly string AREA_KOR_ACAD      = "702KOR";
         private static readonly string AREA_KOR_SHY       = "710KOR";
         private static readonly string AREA_MAL_SURFACE   = "901MAL";
+        private static readonly string AREA_MAL_ACADEMY   = "903MAL";
+        private static readonly string AREA_MAL_TRAYCORE  = "904MAL";
 
         //Locked Doors
         private const string LABEL_101PERTODORMS = "sw_door_per006";         // Dorms from Admin
@@ -270,6 +272,9 @@ namespace KotOR2RandoConsole
             //Add Transition to 410DXN
             tasks.Add(Task.Run(() => Add410DXNTransition(paths)));
 
+            //Add TRansition to 904MAL
+            tasks.Add(Task.Run(() => Add904MALTransition(paths)));
+
             Task.WhenAll(tasks).Wait();
         }
 
@@ -334,6 +339,25 @@ namespace KotOR2RandoConsole
                 rf.File_Data = g.ToRawData();
                 r.WriteToFile(fi.FullName);
             }
+        }  
+        private static void Add403DXNShuttleIziz(K2Paths paths)
+        {
+            string filename = LookupTable[AREA_DXN_MANDO] + "_s.rim";
+            var fi = paths.FilesInModules.FirstOrDefault(f => f.Name == filename);
+            if (!fi.Exists) return;
+            lock (AREA_DXN_MANDO)
+            {
+                RIM r = new RIM(fi.FullName);   // Open what replaced this the astroid exterior.
+                RIM.rFile rf = r.File_Table.FirstOrDefault(x => x.TypeID == (int)ResourceType.UTP && x.Label == LABEL_403SHUTTLEIZIZ);
+                GFF g = new GFF(rf.File_Data);  // Grab the git out of the file.
+
+                //Just set clicking to take to iziz
+                (g.Top_Level.Fields.FirstOrDefault(x => x.Label == "OnUsed") as GFF.ResRef).Reference = "a_to_iziz2";
+
+                // Write change(s) to file.
+                rf.File_Data = g.ToRawData();
+                r.WriteToFile(fi.FullName);
+            }
         }
         private static void Add410DXNTransition(K2Paths paths)
         {
@@ -355,25 +379,6 @@ namespace KotOR2RandoConsole
                 (transition.Fields.FirstOrDefault(a => a.Label == "LinkedToModule") as GFF.ResRef).Reference = AREA_DXN_MANDO;
                 (transition.Fields.FirstOrDefault(a => a.Label == "TransitionDestin") as GFF.CExoLocString).StringRef = 87533;
                 (transition.Fields.FirstOrDefault(a => a.Label == "LinkedTo") as GFF.CExoString).CEString = "From_402DXN";
-
-                // Write change(s) to file.
-                rf.File_Data = g.ToRawData();
-                r.WriteToFile(fi.FullName);
-            }
-        }
-        private static void Add403DXNShuttleIziz(K2Paths paths)
-        {
-            string filename = LookupTable[AREA_DXN_MANDO] + "_s.rim";
-            var fi = paths.FilesInModules.FirstOrDefault(f => f.Name == filename);
-            if (!fi.Exists) return;
-            lock (AREA_DXN_MANDO)
-            {
-                RIM r = new RIM(fi.FullName);   // Open what replaced this the astroid exterior.
-                RIM.rFile rf = r.File_Table.FirstOrDefault(x => x.TypeID == (int)ResourceType.UTP && x.Label == LABEL_403SHUTTLEIZIZ);
-                GFF g = new GFF(rf.File_Data);  // Grab the git out of the file.
-
-                //Just set clicking to take to iziz
-                (g.Top_Level.Fields.FirstOrDefault(x => x.Label == "OnUsed") as GFF.ResRef).Reference = "a_to_iziz2";
 
                 // Write change(s) to file.
                 rf.File_Data = g.ToRawData();
@@ -415,6 +420,68 @@ namespace KotOR2RandoConsole
                 }
             }
         }
+        private static void Add904MALTransition(K2Paths paths)
+        {
+            string filename = LookupTable[AREA_MAL_TRAYCORE] + ".rim";
+            var fi = paths.FilesInModules.FirstOrDefault(f => f.Name == filename);
+            if (!fi.Exists) return;
+            lock (AREA_MAL_TRAYCORE)
+            {
+                RIM r = new RIM(fi.FullName);   // Open what replaced this the astroid exterior.
+                RIM.rFile rf = r.File_Table.FirstOrDefault(x => x.TypeID == (int)ResourceType.GIT);
+                GFF g = new GFF(rf.File_Data);  // Grab the git out of the file.
+
+                //Create Tranistion Struct
+                GFF.STRUCT TransitionStruct = new GFF.STRUCT("", 1, new List<GFF.FIELD>()
+                {
+                    new GFF.LIST("Geometry", new List<GFF.STRUCT>()
+                    {
+                        new GFF.STRUCT("", 3, new List<GFF.FIELD>()
+                        {
+                            new GFF.FLOAT("PointX", 0.0f),
+                            new GFF.FLOAT("PointY", -10.0f),
+                            new GFF.FLOAT("PointZ", 0.0f)
+                        }),
+                        new GFF.STRUCT("", 3, new List<GFF.FIELD>()
+                        {
+                            new GFF.FLOAT("PointX", 0.0f),
+                            new GFF.FLOAT("PointY", 0.0f),
+                            new GFF.FLOAT("PointZ", 2.0f)
+                        }),
+                        new GFF.STRUCT("", 3, new List<GFF.FIELD>()
+                        {
+                            new GFF.FLOAT("PointX", 4.0f),
+                            new GFF.FLOAT("PointY", 0.0f),
+                            new GFF.FLOAT("PointZ", 2.0f)
+                        }),
+                        new GFF.STRUCT("", 3, new List<GFF.FIELD>()
+                        {
+                            new GFF.FLOAT("PointX", 4.0f),
+                            new GFF.FLOAT("PointY", -10.0f),
+                            new GFF.FLOAT("PointZ", 0.0f)
+                        })
+                    }),
+                    new GFF.CExoString("LinkedTo", "FROM_904MAL"),
+                    new GFF.BYTE("LinkedToFlags", 2),
+                    new GFF.ResRef("LinkedToModule", AREA_MAL_ACADEMY),
+                    new GFF.CExoString("Tag", "To_904MAL"),
+                    new GFF.ResRef("TemplateResRef", "newtransition"),
+                    new GFF.CExoLocString("TransitionDestin", 101046, new()),
+                    new GFF.FLOAT("XOrientation", 0.0f),
+                    new GFF.FLOAT("YOrientation", 0.0f),
+                    new GFF.FLOAT("ZOrientation", 0.0f),
+                    new GFF.FLOAT("XPosition", -2.0f),
+                    new GFF.FLOAT("YPosition", -60.0f),
+                    new GFF.FLOAT("ZPosition", 0.0f)
+                });
+
+                (g.Top_Level.Fields.FirstOrDefault(f => f.Label == "TriggerList") as GFF.LIST).Structs.Add(TransitionStruct);
+
+                // Write change(s) to file.
+                rf.File_Data = g.ToRawData();
+                r.WriteToFile(fi.FullName);
+            }
+        }
         /// <summary>
         /// Update warp coordinates that are in bad locations by default.
         /// </summary>
@@ -446,7 +513,6 @@ namespace KotOR2RandoConsole
                 r.WriteToFile(kvp.Value.FullName);
             }
         }
-
         private static void FixTELInfoTerm(K2Paths paths)
         {
             // Grab the info terminal dialog
