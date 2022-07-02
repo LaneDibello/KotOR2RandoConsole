@@ -25,7 +25,8 @@ namespace KotOR2RandoConsole
         private static readonly string AREA_NAR_JEKK      = "304NAR";
         private static readonly string AREA_NAR_J_TUNNELS = "305NAR";
         private static readonly string AREA_NAR_G0T0      = "351NAR";
-        private static readonly string AREA_DXN_MANDO     = "403DXN"; 
+        private static readonly string AREA_DXN_MANDO     = "403DXN";
+        private static readonly string AREA_DXN_NADDEXT   = "410DXN";
         private static readonly string AREA_DAN_COURTYARD = "605DAN";
         private static readonly string AREA_KOR_ACAD      = "702KOR";
         private static readonly string AREA_KOR_SHY       = "710KOR";
@@ -266,6 +267,8 @@ namespace KotOR2RandoConsole
             //Add elevator to 901MAL
             tasks.Add(Task.Run(() => Add901MALEbonElevator(paths)));
 
+            //Add Transition to 410DXN
+            tasks.Add(Task.Run(() => Add410DXNTransition(paths)));
 
             Task.WhenAll(tasks).Wait();
         }
@@ -326,6 +329,32 @@ namespace KotOR2RandoConsole
                 });
 
                 (g.Top_Level.Fields.FirstOrDefault(f => f.Label == "TriggerList") as GFF.LIST).Structs.Add(TransitionStruct);
+
+                // Write change(s) to file.
+                rf.File_Data = g.ToRawData();
+                r.WriteToFile(fi.FullName);
+            }
+        }
+        private static void Add410DXNTransition(K2Paths paths)
+        {
+            string filename = LookupTable[AREA_DXN_NADDEXT] + ".rim";
+            var fi = paths.FilesInModules.FirstOrDefault(f => f.Name == filename);
+            if (!fi.Exists) return;
+            lock (AREA_DXN_NADDEXT)
+            {
+                RIM r = new RIM(fi.FullName);   // Open what replaced this the astroid exterior.
+                RIM.rFile rf = r.File_Table.FirstOrDefault(x => x.TypeID == (int)ResourceType.GIT);
+                GFF g = new GFF(rf.File_Data);  // Grab the git out of the file.
+
+                var transition = (g.Top_Level.Fields.FirstOrDefault(
+                    f => f.Label == "TriggerList") as GFF.LIST).Structs.FirstOrDefault(
+                        y => (y.Fields.FirstOrDefault(
+                            z => z.Label == "TemplateResRef") as GFF.ResRef).Reference == "newtransition002");
+
+                (transition.Fields.FirstOrDefault(a => a.Label == "LinkedToFlags") as GFF.BYTE).Value = 2;
+                (transition.Fields.FirstOrDefault(a => a.Label == "LinkedToModule") as GFF.ResRef).Reference = AREA_DXN_MANDO;
+                (transition.Fields.FirstOrDefault(a => a.Label == "TransitionDestin") as GFF.CExoLocString).StringRef = 87533;
+                (transition.Fields.FirstOrDefault(a => a.Label == "LinkedTo") as GFF.CExoString).CEString = "From_402DXN";
 
                 // Write change(s) to file.
                 rf.File_Data = g.ToRawData();
