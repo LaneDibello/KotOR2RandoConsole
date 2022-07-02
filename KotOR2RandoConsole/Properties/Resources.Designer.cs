@@ -169,5 +169,15 @@ namespace KotOR2RandoConsole.Properties {
                 return ((byte[])(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        public static byte[] shuttle {
+            get {
+                object obj = ResourceManager.GetObject("shuttle", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

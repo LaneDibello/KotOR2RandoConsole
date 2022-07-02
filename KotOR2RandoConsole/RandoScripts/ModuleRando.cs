@@ -27,6 +27,7 @@ namespace KotOR2RandoConsole
         private static readonly string AREA_NAR_G0T0      = "351NAR";
         private static readonly string AREA_DXN_MANDO     = "403DXN";
         private static readonly string AREA_DXN_NADDEXT   = "410DXN";
+        private static readonly string AREA_OND_SPACEPORT = "501OND";
         private static readonly string AREA_DAN_COURTYARD = "605DAN";
         private static readonly string AREA_KOR_ACAD      = "702KOR";
         private static readonly string AREA_KOR_SHY       = "710KOR";
@@ -36,27 +37,29 @@ namespace KotOR2RandoConsole
 
         //Locked Doors
         private const string LABEL_101PERTODORMS = "sw_door_per006";         // Dorms from Admin
-		private const string LABEL_101PERTOMININGTUNNELS = "sw_door_per004"; // Mining Tunnels from Admin
-		private const string LABEL_101PERTOFUELDEPOT = "sw_door_per007";     // Fuel Depot from Admin
-		private const string LABEL_101PERTOHARBINGER = "sw_door_taris009";   // Though the docking bay form Admin
-		private const string LABEL_103PERTOMININGTUNNELS = "sw_door_per006"; // Explosion door at start of module
-		private const string LABEL_103PERFORCESHIELDS = "sw_door_per005";    // Force fields splitting fuel depot into two sections
+        private const string LABEL_101PERTOMININGTUNNELS = "sw_door_per004"; // Mining Tunnels from Admin
+        private const string LABEL_101PERTOFUELDEPOT = "sw_door_per007";     // Fuel Depot from Admin
+        private const string LABEL_101PERTOHARBINGER = "sw_door_taris009";   // Though the docking bay form Admin
+        private const string LABEL_103PERTOMININGTUNNELS = "sw_door_per006"; // Explosion door at start of module
+        private const string LABEL_103PERFORCESHIELDS = "sw_door_per005";    // Force fields splitting fuel depot into two sections
         private const string LABEL_103PERSHIELD2 = "sw_door_per010";         // Secondary Fuel Depot Shield blocking way down
+        private const string LABEL_103HKTRIGGER = "newgeneric010";           // HK-50 Conversation trigger
         private const string LABEL_105PERTOASTROID = "sw_door_per005";       // Return to astroid exterior from Dormitory
         private const string LABEL_106PEREASTDOOR = "sw_door_per003";        // Door leading to Ebon Hawk
-		private const string LABEL_203TELAPPTDOOR = "adoor_intro";           // Appartment door we spawn behind
-		private const string LABEL_203TELEXCHANGE = "sw_door_telos002";      // Entacnce to Exchange base
-		private const string LABEL_222TELRAVAGER = "d_222doorseal001";       // Board the ravager with mandalore, Visas, or the horrid DLZ
-		private const string LABEL_262TELPLATEAU = "sw_door_sforg001";       // Polar Plateau from Atris's academy
-		private const string LABEL_303NARZEZDOOR = "door_flophouse_s";       // Into the Secret zone with Mira and Zez that frequently breaks even in normal gameplay
-		private const string LABEL_304NARBACKROOM = "visquisdoor";           // Door in Jekk'Jekk Tarr leading to Visquis's private suit, and the Tunnels
-		private const string LABEL_305NARTOJEKKJEKK = "door_narshad002";     // Leave the tunnels and return to the cantina for once
-		private const string LABEL_351NARG0T0EBONHAWK = "door_narshad008";   // Reboard the Ebon Hawk without doing the entirity of G0T0's yacht, though the CS it leads to breaks frequently, look into other options
+        private const string LABEL_203TELAPPTDOOR = "adoor_intro";           // Appartment door we spawn behind
+        private const string LABEL_203TELEXCHANGE = "sw_door_telos002";      // Entacnce to Exchange base
+        private const string LABEL_222TELRAVAGER = "d_222doorseal001";       // Board the ravager with mandalore, Visas, or the horrid DLZ
+        private const string LABEL_262TELPLATEAU = "sw_door_sforg001";       // Polar Plateau from Atris's academy
+        private const string LABEL_303NARZEZDOOR = "door_flophouse_s";       // Into the Secret zone with Mira and Zez that frequently breaks even in normal gameplay
+        private const string LABEL_304NARBACKROOM = "visquisdoor";           // Door in Jekk'Jekk Tarr leading to Visquis's private suit, and the Tunnels
+        private const string LABEL_305NARTOJEKKJEKK = "door_narshad002";     // Leave the tunnels and return to the cantina for once
+        private const string LABEL_351NARG0T0EBONHAWK = "door_narshad008";   // Reboard the Ebon Hawk without doing the entirity of G0T0's yacht, though the CS it leads to breaks frequently, look into other options
         private const string LABEL_403BASALISKDOOR = "hangar_door2";         // Door to access the Basilisk War droid hanger
         private const string LABEL_403SHUTTLEIZIZ = "shuttle_iziz";          // Shuttle Mandalore takes to Iziz
+        private const string LABEL_501SHUTTLEIZIZ = "shuttle_iziz";          // Shuttle Mandalore takes to Iziz
         private const string LABEL_605DANREBUILTENCLAVE = "door_650";        // Enter the Rebuilt Jedi Enclave Early
-		private const string LABEL_702KORVALLEY = "door_enter";              // Leave the Sith acadmeny without doing 10 minutes of puzzles or a DLZ
-		private const string LABEL_710KORLUDOKRESSH = "sealeddoor";          // Enter the secret tomb in the shyrack cave without heavy alignment
+        private const string LABEL_702KORVALLEY = "door_enter";              // Leave the Sith acadmeny without doing 10 minutes of puzzles or a DLZ
+        private const string LABEL_710KORLUDOKRESSH = "sealeddoor";          // Enter the secret tomb in the shyrack cave without heavy alignment
         #endregion
 
         internal static Dictionary<string, string> LookupTable { get; private set; } = new Dictionary<string, string>();
@@ -190,7 +193,6 @@ namespace KotOR2RandoConsole
         /// <param name="label">Label of the door to unlock.</param>
         private static void UnlockDoorInFile(K2Paths paths, string area, string label)
         {
-
             var areaFiles = paths.FilesInModules.Where(fi => fi.Name.Contains(LookupTable[area]));
             foreach (FileInfo fi in areaFiles)
             {
@@ -271,6 +273,9 @@ namespace KotOR2RandoConsole
 
             //Add Transition to 410DXN
             tasks.Add(Task.Run(() => Add410DXNTransition(paths)));
+
+            //Activate Onderon Shuttle
+            tasks.Add(Task.Run(() => Fix501ONDShuttle(paths)));
 
             //Add TRansition to 904MAL
             tasks.Add(Task.Run(() => Add904MALTransition(paths)));
@@ -379,6 +384,30 @@ namespace KotOR2RandoConsole
                 (transition.Fields.FirstOrDefault(a => a.Label == "LinkedToModule") as GFF.ResRef).Reference = AREA_DXN_MANDO;
                 (transition.Fields.FirstOrDefault(a => a.Label == "TransitionDestin") as GFF.CExoLocString).StringRef = 87533;
                 (transition.Fields.FirstOrDefault(a => a.Label == "LinkedTo") as GFF.CExoString).CEString = "From_402DXN";
+
+                // Write change(s) to file.
+                rf.File_Data = g.ToRawData();
+                r.WriteToFile(fi.FullName);
+            }
+        }
+        private static void Fix501ONDShuttle(K2Paths paths)
+        {
+            /* 
+             We rename shuttle.dlg to shuttle501.dlg so it doesn't conflict for 403DXN's convo of the same name
+             */
+            File.WriteAllBytes(paths.Override + "shuttle501.dlg", Properties.Resources.shuttle); // Shuttle convo back to onderon
+
+            string filename = LookupTable[AREA_OND_SPACEPORT] + "_s.rim";
+            var fi = paths.FilesInModules.FirstOrDefault(f => f.Name == filename);
+            if (!fi.Exists) return;
+            lock (AREA_OND_SPACEPORT)
+            {
+                RIM r = new RIM(fi.FullName);   // Open what replaced this the astroid exterior.
+                RIM.rFile rf = r.File_Table.FirstOrDefault(x => x.TypeID == (int)ResourceType.UTP && x.Label == LABEL_501SHUTTLEIZIZ);
+                GFF g = new GFF(rf.File_Data);  // Grab the git out of the file.
+
+                //Just set clicking to take to iziz
+                (g.Top_Level.Fields.FirstOrDefault(x => x.Label == "Conversation") as GFF.ResRef).Reference = "shuttle501";
 
                 // Write change(s) to file.
                 rf.File_Data = g.ToRawData();
