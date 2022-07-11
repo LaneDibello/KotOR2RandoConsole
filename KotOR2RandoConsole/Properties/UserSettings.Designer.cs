@@ -106,5 +106,17 @@ namespace KotOR2RandoConsole.Properties {
                 this["DoorUnlocks"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool DoTextureRando {
+            get {
+                return ((bool)(this["DoTextureRando"]));
+            }
+            set {
+                this["DoTextureRando"] = value;
+            }
+        }
     }
 }

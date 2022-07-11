@@ -150,7 +150,271 @@ namespace KotOR2RandoConsole
 
             }
         }
+        public static void Textures()
+        {
+            Console.Clear();
 
+            Console.Write($"Tetxure rando is ");
+            if (Properties.UserSettings.Default.DoTextureRando) Console.BackgroundColor = ConsoleColor.Green;
+            else Console.BackgroundColor = ConsoleColor.Red;
+            Console.WriteLine($"{(Properties.UserSettings.Default.DoTextureRando ? "Enabled" : "Disabled")}");
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.WriteLine("t : Toggle Texture Randomization");
+            Console.WriteLine("p : Print omitted textures");
+            Console.WriteLine("o : Omit new texture");
+            Console.WriteLine("c : Configure texture categories");
+            Console.WriteLine("x : Return to Config");
+            var key = Console.ReadKey();
+            switch (key.KeyChar)
+            {
+                case 't':
+                    Properties.UserSettings.Default.DoTextureRando = !Properties.UserSettings.Default.DoTextureRando;
+                    Textures();
+                    break;
+                case 'p':
+                    Console.Clear();
+                    if (File.Exists("OmitTextures.txt")) Console.WriteLine(File.ReadAllText("OmitTextures.txt"));
+                    else Console.WriteLine("None");
+                    Console.WriteLine("Press any key...");
+                    Console.ReadKey();
+                    Textures();
+                    break;
+                case 'o':
+                    Console.Clear();
+                    Console.WriteLine("Texture: ");
+                    string? item = Console.ReadLine();
+                    //write out
+                    File.AppendAllText("OmitTextures.txt", item + "\n");
+                    Textures();
+                    break;
+                case 'c':
+                    ListTextureSettings();
+                    Textures();
+                    break;
+                case 'x':
+                    Properties.UserSettings.Default.Save();
+                    Properties.Texture.Default.Save();
+                    Prompts.RandoConfig();
+                    break;
+                default:
+                    Textures();
+                    break;
+
+            }
+        }
+
+        private static void ListTextureSettings()
+        {
+            Console.Clear();
+            Console.WriteLine($"0 : Creatures - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeCreatures}");
+            Console.WriteLine($"1 : CubeMaps - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeCubeMaps}");
+            Console.WriteLine($"2 : Effects - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeEffects}");
+            Console.WriteLine($"3 : Items - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeItems}");
+            Console.WriteLine($"4 : NPC - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeNPC}");
+            Console.WriteLine($"5 : Other - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeOther}");
+            Console.WriteLine($"6 : Party - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeParty}");
+            Console.WriteLine($"7 : Placeables - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizePlaceables}");
+            Console.WriteLine($"8 : EbonHawk - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeEbonHawk}");
+            Console.WriteLine($"9 : Dantooine - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeDantooine}");
+            Console.WriteLine($"a : M4_78 - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeM4_78}");
+            Console.WriteLine($"b : Dxun - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeDxun}");
+            Console.WriteLine($"c : Harbinger - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeHarbinger}");
+            Console.WriteLine($"d : Korriban - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeKorriban}");
+            Console.WriteLine($"e : Malachor - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeMalachor}");
+            Console.WriteLine($"f : MiniGame - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeMiniGame}");
+            Console.WriteLine($"g : NarShadaa - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeNarShadaa}");
+            Console.WriteLine($"h : Ravager - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeRavager}");
+            Console.WriteLine($"i : Onderon - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeOnderon}");
+            Console.WriteLine($"j : Peragus - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizePeragus}");
+            Console.WriteLine($"k : Telos - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeTelos}");
+            Console.WriteLine($"l : PlayerBodies - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizePlayBodies}");
+            Console.WriteLine($"o : PlayerHeads - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizePlayHeads}");
+            Console.WriteLine($"p : Stunt - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeStunt}");
+            Console.WriteLine($"q : Vehicles - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeVehicles}");
+            Console.WriteLine($"r : Weapons - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeWeapons}");
+
+            Console.WriteLine("\nn : Set all to 'None'");
+            Console.WriteLine("t : Set all to 'Type'");
+            Console.WriteLine("m : Set all to 'Max'");
+
+            Console.WriteLine("\nx : Exit...");
+
+            var key = Console.ReadKey();
+            switch (key.KeyChar)
+            {
+                case 'x':
+                    break;
+                case 'n':
+                    SetAllTextureCats(RandomizationLevel.None);
+                    ListTextureSettings();
+                    break;
+                case 't':
+                    SetAllTextureCats(RandomizationLevel.Type);
+                    ListTextureSettings();
+                    break;
+                case 'm':
+                    SetAllTextureCats(RandomizationLevel.Max);
+                    ListTextureSettings();
+                    break;
+                case '0':
+                    Properties.Texture.Default.TextureRandomizeCreatures = ConfigureTextureCat();
+                    ListTextureSettings();
+                    break;
+                case '1':
+                    Properties.Texture.Default.TextureRandomizeCubeMaps = ConfigureTextureCat();
+                    ListTextureSettings();
+                    break;
+                case '2':
+                    Properties.Texture.Default.TextureRandomizeEffects = ConfigureTextureCat();
+                    ListTextureSettings();
+                    break;
+                case '3':
+                    Properties.Texture.Default.TextureRandomizeItems = ConfigureTextureCat();
+                    ListTextureSettings();
+                    break;
+                case '4':
+                    Properties.Texture.Default.TextureRandomizeNPC = ConfigureTextureCat();
+                    ListTextureSettings();
+                    break;
+                case '5':
+                    Properties.Texture.Default.TextureRandomizeOther = ConfigureTextureCat();
+                    ListTextureSettings();
+                    break;
+                case '6':
+                    Properties.Texture.Default.TextureRandomizeParty = ConfigureTextureCat();
+                    ListTextureSettings();
+                    break;
+                case '7':
+                    Properties.Texture.Default.TextureRandomizePlaceables = ConfigureTextureCat();
+                    ListTextureSettings();
+                    break;
+                case '8':
+                    Properties.Texture.Default.TextureRandomizeEbonHawk = ConfigureTextureCat();
+                    ListTextureSettings();
+                    break;
+                case '9':
+                    Properties.Texture.Default.TextureRandomizeDantooine = ConfigureTextureCat();
+                    ListTextureSettings();
+                    break;
+                case 'a':
+                    Properties.Texture.Default.TextureRandomizeM4_78 = ConfigureTextureCat();
+                    ListTextureSettings();
+                    break;
+                case 'b':
+                    Properties.Texture.Default.TextureRandomizeDxun = ConfigureTextureCat();
+                    ListTextureSettings();
+                    break;
+                case 'c':
+                    Properties.Texture.Default.TextureRandomizeHarbinger = ConfigureTextureCat();
+                    ListTextureSettings();
+                    break;
+                case 'd':
+                    Properties.Texture.Default.TextureRandomizeKorriban = ConfigureTextureCat();
+                    ListTextureSettings();
+                    break;
+                case 'e':
+                    Properties.Texture.Default.TextureRandomizeMalachor = ConfigureTextureCat();
+                    ListTextureSettings();
+                    break;
+                case 'f':
+                    Properties.Texture.Default.TextureRandomizeMiniGame = ConfigureTextureCat();
+                    ListTextureSettings();
+                    break;
+                case 'g':
+                    Properties.Texture.Default.TextureRandomizeNarShadaa = ConfigureTextureCat();
+                    ListTextureSettings();
+                    break;
+                case 'h':
+                    Properties.Texture.Default.TextureRandomizeRavager = ConfigureTextureCat();
+                    ListTextureSettings();
+                    break;
+                case 'i':
+                    Properties.Texture.Default.TextureRandomizeOnderon = ConfigureTextureCat();
+                    ListTextureSettings();
+                    break;
+                case 'j':
+                    Properties.Texture.Default.TextureRandomizePeragus = ConfigureTextureCat();
+                    ListTextureSettings();
+                    break;
+                case 'k':
+                    Properties.Texture.Default.TextureRandomizeTelos = ConfigureTextureCat();
+                    ListTextureSettings();
+                    break;
+                case 'l':
+                    Properties.Texture.Default.TextureRandomizePlayBodies = ConfigureTextureCat();
+                    ListTextureSettings();
+                    break;
+                case 'o':
+                    Properties.Texture.Default.TextureRandomizePlayBodies = ConfigureTextureCat();
+                    ListTextureSettings();
+                    break;
+                case 'p':
+                    Properties.Texture.Default.TextureRandomizePlayBodies = ConfigureTextureCat();
+                    ListTextureSettings();
+                    break;
+                case 'q':
+                    Properties.Texture.Default.TextureRandomizePlayBodies = ConfigureTextureCat();
+                    ListTextureSettings();
+                    break;
+                case 'r':
+                    Properties.Texture.Default.TextureRandomizePlayBodies = ConfigureTextureCat();
+                    ListTextureSettings();
+                    break;
+                default:
+                    ListTextureSettings();
+                    break;
+            }
+        }
+        private static void SetAllTextureCats(RandomizationLevel r)
+        {
+
+            Properties.Texture.Default.TextureRandomizeCreatures = (int)r;
+            Properties.Texture.Default.TextureRandomizeCubeMaps = (int)r;
+            Properties.Texture.Default.TextureRandomizeEffects = (int)r;
+            Properties.Texture.Default.TextureRandomizeItems = (int)r;
+            Properties.Texture.Default.TextureRandomizeNPC = (int)r;
+            Properties.Texture.Default.TextureRandomizeOther = (int)r;
+            Properties.Texture.Default.TextureRandomizeParty = (int)r;
+            Properties.Texture.Default.TextureRandomizePlaceables = (int)r;
+            Properties.Texture.Default.TextureRandomizeEbonHawk = (int)r;
+            Properties.Texture.Default.TextureRandomizeDantooine = (int)r;
+            Properties.Texture.Default.TextureRandomizeM4_78 = (int)r;
+            Properties.Texture.Default.TextureRandomizeDxun = (int)r;
+            Properties.Texture.Default.TextureRandomizeHarbinger = (int)r;
+            Properties.Texture.Default.TextureRandomizeKorriban = (int)r;
+            Properties.Texture.Default.TextureRandomizeMalachor = (int)r;
+            Properties.Texture.Default.TextureRandomizeMiniGame = (int)r;
+            Properties.Texture.Default.TextureRandomizeNarShadaa = (int)r;
+            Properties.Texture.Default.TextureRandomizeRavager = (int)r;
+            Properties.Texture.Default.TextureRandomizeOnderon = (int)r;
+            Properties.Texture.Default.TextureRandomizePeragus = (int)r;
+            Properties.Texture.Default.TextureRandomizeTelos = (int)r;
+            Properties.Texture.Default.TextureRandomizePlayBodies = (int)r;
+            Properties.Texture.Default.TextureRandomizePlayHeads = (int)r;
+            Properties.Texture.Default.TextureRandomizeStunt = (int)r;
+            Properties.Texture.Default.TextureRandomizeVehicles = (int)r;
+            Properties.Texture.Default.TextureRandomizeWeapons = (int)r;
+        }
+        private static int ConfigureTextureCat()
+        {
+            Console.Clear();
+            Console.WriteLine("Select Randomization Level: ");
+            Console.WriteLine("n - None");
+            Console.WriteLine("t - Type");
+            Console.WriteLine("m - Max");
+            var key = Console.ReadKey();
+            switch (key.KeyChar)
+            {
+                case 'n':
+                    return (int)RandomizationLevel.None;
+                case 't':
+                    return (int)RandomizationLevel.Type;
+                case 'm':
+                    return (int)RandomizationLevel.Max;
+                default:
+                    return 0;
+            }
+        }
         private static void ListItemSettings()
         {
             Console.Clear();

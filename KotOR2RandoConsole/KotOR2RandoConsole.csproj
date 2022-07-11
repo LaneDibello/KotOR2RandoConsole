@@ -28,6 +28,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Update="Properties\Texture.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Texture.settings</DependentUpon>
+    </Compile>
     <Compile Update="Properties\UserSettings.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
@@ -46,6 +51,10 @@
     <None Update="Properties\Items.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Items.Designer.cs</LastGenOutput>
+    </None>
+    <None Update="Properties\Texture.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Texture.Designer.cs</LastGenOutput>
     </None>
     <None Update="Properties\UserSettings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

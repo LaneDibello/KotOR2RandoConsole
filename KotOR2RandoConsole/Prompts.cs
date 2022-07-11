@@ -93,6 +93,7 @@ namespace KotOR2RandoConsole
             Console.WriteLine("s : set seed");
             Console.WriteLine("m : modules");
             Console.WriteLine("i : items");
+            Console.WriteLine("t : textures");
             Console.WriteLine("\nx : done");
             var key = Console.ReadKey();
             switch (key.KeyChar)
@@ -105,6 +106,9 @@ namespace KotOR2RandoConsole
                     break;
                 case 'i':
                     RandoConfigMenus.Items();
+                    break;
+                case 't':
+                    RandoConfigMenus.Textures();
                     break;
                 case 'x':
                     StartUp();
@@ -160,6 +164,41 @@ namespace KotOR2RandoConsole
                 Console.WriteLine($"\t\t> Named Player Crystal - {(RandomizationLevel)Properties.Items.Default.RandomizePCrystal}");
                 Console.WriteLine($"\t\t> Various - {(RandomizationLevel)Properties.Items.Default.RandomizeVarious}");
             }
+            if (Properties.UserSettings.Default.DoTextureRando)
+            {
+                List<string> OmitTextures = new List<string>();
+                if (File.Exists("OmitTextures.txt")) OmitTextures.AddRange(File.ReadAllLines("OmitTextures.txt"));
+                if (OmitTextures.Count > 0 && OmitTextures.Last() == "") OmitTextures.RemoveAt(OmitTextures.Count - 1);
+                Console.WriteLine("Texture Randomization");
+                Console.WriteLine($"\t- Omitting {OmitTextures.Count} Textures");
+                Console.WriteLine($"\t- Texture Categories:");
+                Console.WriteLine($"\t\t> Creatures - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeCreatures}");
+                Console.WriteLine($"\t\t> CubeMaps - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeCubeMaps}");
+                Console.WriteLine($"\t\t> Effects - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeEffects}");
+                Console.WriteLine($"\t\t> Items - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeItems}");
+                Console.WriteLine($"\t\t> NPC - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeNPC}");
+                Console.WriteLine($"\t\t> Other - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeOther}");
+                Console.WriteLine($"\t\t> Party - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeParty}");
+                Console.WriteLine($"\t\t> Placeables - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizePlaceables}");
+                Console.WriteLine($"\t\t> EbonHawk - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeEbonHawk}");
+                Console.WriteLine($"\t\t> Dantooine - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeDantooine}");
+                Console.WriteLine($"\t\t> M4_78 - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeM4_78}");
+                Console.WriteLine($"\t\t> Dxun - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeDxun}");
+                Console.WriteLine($"\t\t> Harbinger - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeHarbinger}");
+                Console.WriteLine($"\t\t> Korriban - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeKorriban}");
+                Console.WriteLine($"\t\t> Malachor - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeMalachor}");
+                Console.WriteLine($"\t\t> MiniGame - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeMiniGame}");
+                Console.WriteLine($"\t\t> NarShadaa - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeNarShadaa}");
+                Console.WriteLine($"\t\t> Ravager - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeRavager}");
+                Console.WriteLine($"\t\t> Onderon - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeOnderon}");
+                Console.WriteLine($"\t\t> Peragus - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizePeragus}");
+                Console.WriteLine($"\t\t> Telos - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeTelos}");
+                Console.WriteLine($"\t\t> PlayerBodies - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizePlayBodies}");
+                Console.WriteLine($"\t\t> PlayerHeads - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizePlayHeads}");
+                Console.WriteLine($"\t\t> Stunt - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeStunt}");
+                Console.WriteLine($"\t\t> Vehicles - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeVehicles}");
+                Console.WriteLine($"\t\t> Weapons - { (RandomizationLevel)Properties.Texture.Default.TextureRandomizeWeapons}");
+            }
             Console.WriteLine("---------------------------------------------------");
             Console.WriteLine("Continue? y/(n)");
             if (Console.ReadKey().KeyChar != 'y')
@@ -195,6 +234,13 @@ namespace KotOR2RandoConsole
             {
                 Console.WriteLine("Randomizing Items...");
                 ItemRando.item_rando(paths);
+            }
+
+            //Textures
+            if (Properties.UserSettings.Default.DoTextureRando)
+            {
+                Console.WriteLine("Randomizing Textures...");
+                TextureRando.texture_rando(paths);
             }
 
             Console.BackgroundColor = ConsoleColor.White;

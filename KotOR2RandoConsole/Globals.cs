@@ -18,6 +18,20 @@ namespace KotOR2RandoConsole
         Max = 3,
     }
 
+    [Serializable]
+    public enum TexturePack
+    {
+        /// <summary> High Quality </summary>
+        [Description("High Quality")]
+        HighQuality = 0,
+        /// <summary> Medium Quality </summary>
+        [Description("Medium Quality")]
+        MedQuality = 1,
+        /// <summary> Low Quality </summary>
+        [Description("Low Quality")]
+        LowQuality = 2,
+    }
+
     public static class Globals
     {
         public static readonly Dictionary<string, Tuple<float, float, float>> FIXED_COORDINATES = new Dictionary<string, Tuple<float, float, float>>()
