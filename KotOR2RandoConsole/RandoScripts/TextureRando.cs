@@ -88,6 +88,7 @@ namespace KotOR2RandoConsole
         public static void texture_rando(K2Paths paths)
         {
             // Prepare for new randomization.
+            paths.BackUpTexturesDirectory();
             Reset();
             AssignSettings();
 
